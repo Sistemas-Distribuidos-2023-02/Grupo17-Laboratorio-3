@@ -1,0 +1,60 @@
+version: '3'
+services:
+  onu:
+    build:
+      context: ./ONU 
+      dockerfile: Dockerfile.ONU
+      args:
+        oms_server: dist065.inf.santiago.usm.cl
+        oms_port: 50051
+    volumes:
+      - ./ONU:/app/ONU
+    network_mode: "host"
+
+  continente:
+    build:
+      context: ./Continente
+      dockerfile: Dockerfile.continente
+      args:
+        oms_server: dist065.inf.santiago.usm.cl
+        oms_port: 50051
+    volumes:
+      - ./Continente:/app/Continente
+    network_mode: "host"
+
+  oms:
+    build:
+      context: ./OMS
+      dockerfile: Dockerfile.OMS
+      args:
+        onu_server: dist066.inf.santiago.usm.cl
+        onu_port: 50070
+        data_node1_server: dist067.inf.santiago.usm.cl
+        data_node1_port: 50052
+        data_node2_server: dist068.inf.santiago.usm.cl
+        data_node2_port: 50053
+    volumes:
+      - ./OMS:/app/OMS
+    network_mode: "host"
+
+  datanode1:
+    build:
+      context: ./Datanodes
+      dockerfile: Dockerfile.Datanodes
+      args:
+        oms_server: dist065.inf.santiago.usm.cl
+        oms_port: 50051
+    volumes:
+      - ./Datanodes:/app/Datanode1
+    network_mode: "host"
+  
+  datanode2:
+    build:
+      context: ./Datanodes
+      dockerfile: Dockerfile.Datanodes
+      args:
+        oms_server: dist065.inf.santiago.usm.cl
+        oms_port: 50051
+    volumes:
+      - ./Datanodes:/app/Datanode2
+    network_mode: "host"
