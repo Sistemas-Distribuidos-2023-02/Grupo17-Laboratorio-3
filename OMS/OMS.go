@@ -17,6 +17,8 @@ var archivo *os.File
 var id int
 var Total int
 
+var data_nodes map[int]string
+
 type server struct {
 	pb.UnimplementedOMSServer
 }
@@ -35,7 +37,7 @@ func (s *server) NotifyBidirectional(steam pb.OMS_NotifyBidirectionalServer) err
 				fmt.Println("La ONU a preguntado por los datos de Infectaods.")
 			}
 			// Abre el archivo
-			file, err := os.Open("Data.txt")
+			file, err := os.Open("DATA.txt")
 			if err != nil {
 				fmt.Println("Error al abrir el archivo:", err)
 				return err
@@ -118,7 +120,7 @@ func (s *server) NotifyBidirectional(steam pb.OMS_NotifyBidirectionalServer) err
 }
 
 func MandarDataONU(){
-	conn, err := grpc.Dial("localhost:50070", grpc.WithInsecure())
+	conn, err := grpc.Dial(os.Getenv("onu_server") + ":" os.Getenv("onu_port"), grpc.WithInsecure())
     if err != nil {
         log.Fatalf("No se pudo conectar al servidor: %v", err)
     }
@@ -140,8 +142,7 @@ func MandarDataDatanodes(id , nodo int, nombre string ){
 	}else {
 		msg = fmt.Sprint(id) + " " + nombre
 	}
-	nodo+=1
-	conn, err := grpc.Dial("localhost:5005"+fmt.Sprint(nodo), grpc.WithInsecure())
+	conn, err := grpc.Dial(data_nodes[nodo], grpc.WithInsecure())
     if err != nil {
         log.Fatalf("No se pudo conectar al servidor: %v", err)
     }
@@ -169,7 +170,11 @@ func ObtenerEstado(Persona string)(string , string){
 }
 
 func main(){
+	data_nodes = make(map[int]string)
 	//Coneccion con el servidor.
+	data_nodes[1] = os.Getenv("data_node1_server") + ":" + os.Getenv("data_node1_port")
+	data_nodes[2] = os.Getenv("data_node2_server") + ":" + os.Getenv("data_node2_port") 
+	
 	listener, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
