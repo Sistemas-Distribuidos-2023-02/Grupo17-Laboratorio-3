@@ -1,17 +1,14 @@
-docker-onu:
-	docker-compose -f docker-compose.yml up -d onu
+docker-mv-1:
+	docker-compose -f docker-compose.yml up -d informante1 fulcrum1
 
-docker-continente:
-	docker-compose -f docker-compose.yml up continente
+docker-mv-2:
+	docker-compose -f docker-compose.yml up -d informante2 fulcrum2
 
-docker-oms:
-	docker-compose -f docker-compose.yml up oms
+docker-mv-3:
+	docker-compose -f docker-compose.yml up -d vanguardia fulcrum3
 
-docker-datanode1:
-	docker-compose -f docker-compose.yml up datanode1
-
-docker-datanode2:
-	docker-compose -f docker-compose.yml up datanode2
+docker-mv-4:
+	docker-compose -f docker-compose.yml up -d broker-luna
 
 docker-down:
 	docker-compose -f docker-compose.yml down

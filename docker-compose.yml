@@ -1,62 +1,98 @@
 version: '3'
 services:
-  onu:
+  fulcrum1:
     build:
-      context: ./ONU 
-      dockerfile: Dockerfile.ONU
+      context: ./Fulcrum
+      dockerfile: Dockerfile.Fulcrum
       args:
-        oms_server: dist065.inf.santiago.usm.cl
-        oms_port: 50051
+        fulcrum2_server: dist066.inf.santiago.usm.cl
+        fulcrum2_port: 50052
+        fulcrum3_server: dist067.inf.santiago.usm.cl
+        fulcrum3_port: 50053
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50070
     volumes:
-      - ./ONU:/app/ONU
+      - ./Fulcrum:/app/Fulcrum
     network_mode: "host"
 
-  continente:
+  fulcrum2:
     build:
-      context: ./Continente
-      dockerfile: Dockerfile.continente
+      context: ./Fulcrum
+      dockerfile: Dockerfile.Fulcrum
       args:
-        oms_server: dist065.inf.santiago.usm.cl
-        oms_port: 50051
+        fulcrum1_server: dist065.inf.santiago.usm.cl
+        fulcrum1_port: 50051
+        fulcrum3_server: dist067.inf.santiago.usm.cl
+        fulcrum3_port: 50053
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50070
     volumes:
-      - ./Continente:/app/Continente
+      - ./Fulcrum:/app/Fulcrum
     network_mode: "host"
 
-  oms:
+  fulcrum3:
     build:
-      context: ./OMS
-      dockerfile: Dockerfile.OMS
+      context: ./Fulcrum
+      dockerfile: Dockerfile.Fulcrum
       args:
-        onu_server: dist066.inf.santiago.usm.cl
-        onu_port: 50070
-        data_node1_server: dist067.inf.santiago.usm.cl
-        data_node1_port: 50052
-        data_node2_server: dist068.inf.santiago.usm.cl
-        data_node2_port: 50053
+        fulcrum1_server: dist065.inf.santiago.usm.cl
+        fulcrum1_port: 50051
+        fulcrum2_server: dist066.inf.santiago.usm.cl
+        fulcrum2_port: 50052
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50070
     volumes:
-      - ./OMS:/app/OMS
+      - ./Fulcrum:/app/Fulcrum
     network_mode: "host"
 
-  datanode1:
+  informante1:
     build:
-      context: ./Datanodes
-      dockerfile: Dockerfile.Datanodes
+      context: ./Informantes
+      dockerfile: Dockerfile.Informante
       args:
-        oms_server: dist065.inf.santiago.usm.cl
-        oms_port: 50051
-        data_node_port: 50052
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50080
     volumes:
-      - ./Datanodes:/app/Datanode1
+      - ./Informante:/app/Informante
     network_mode: "host"
-  
-  datanode2:
+
+  informante2:
     build:
-      context: ./Datanodes
-      dockerfile: Dockerfile.Datanodes
+      context: ./Informantes
+      dockerfile: Dockerfile.Informante
       args:
-        oms_server: dist065.inf.santiago.usm.cl
-        oms_port: 50051
-        data_node_port: 50053
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50080
     volumes:
-      - ./Datanodes:/app/Datanode2
+      - ./Informante:/app/Informante
+    network_mode: "host"
+
+  broker-luna:
+    build:
+      context: ./BrokerLuna
+      dockerfile: Dockerfile.BrokerLuna
+      args:
+        fulcrum1_server: dist065.inf.santiago.usm.cl
+        fulcrum1_port: 50051
+        fulcrum2_server: dist066.inf.santiago.usm.cl
+        fulcrum2_port: 50052
+        fulcrum3_server: dist067.inf.santiago.usm.cl
+        fulcrum3_port: 50053
+        informante1_server: dist065.inf.santiago.usm.cl
+        informante1_port: 50081
+        informante2_server: dist066.inf.santiago.usm.cl
+        informante2_port: 50082
+    volumes:
+      - ./BrokerLuna:/app/BrokerLuna
+    network_mode: "host"
+
+  vanguardia:
+    build:
+      context: ./Vanguardia
+      dockerfile: Dockerfile.Vanguardia
+      args:
+        broker_server: dist068.inf.santiago.usm.cl
+        broker_port: 50080
+    volumes:
+      - ./Vanguardia:/app/Vanguardia
     network_mode: "host"
