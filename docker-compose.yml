@@ -82,6 +82,8 @@ services:
         informante1_port: 50081
         informante2_server: dist066.inf.santiago.usm.cl
         informante2_port: 50082
+        vanguardia_server: dist067.inf.santiago.usm.cl
+        vanguardia_port: 50083
     volumes:
       - ./BrokerLuna:/app/BrokerLuna
     network_mode: "host"

@@ -43,3 +43,22 @@ func propagarCambios(servidor *ServidorFulcrum) {
 func manejarConsistencia(servidores ...*ServidorFulcrum) {
     // Implementar lógica para manejar la consistencia y realizar un merge
 }
+
+func main(){
+
+	//Coneccion con el servidor.
+	//SE DEBE DIFERENCIAR LOS DATANODES POR EL PUERTO 50052 SERA NODO 1 Y 50053 NODO 2
+	listener, err := net.Listen("tcp", "localhost:" + os.Getenv("data_node_port"))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	archivo ,_  = os.Create("DATA.txt")
+	serv := grpc.NewServer()
+	personas = make(map[int]string)
+	pb.RegisterOMSServer(serv, &server{})
+	log.Printf("server listening at %v", listener.Addr())
+	if err := serv.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
+}
