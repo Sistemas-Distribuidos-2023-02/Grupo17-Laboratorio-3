@@ -1,4 +1,4 @@
-# Laboratorio 2 #
+# Laboratorio 3 #
 
 * Vicente Muñoz Rojas - 202073557-3
 * Carlos Lagos - 202073571-9
@@ -27,3 +27,7 @@ Para iniciar los servidores de los datanodes se usa el siguente comando.
 make docker-datanode1
 make docker-datanode2
 ```
+
+
+
+
