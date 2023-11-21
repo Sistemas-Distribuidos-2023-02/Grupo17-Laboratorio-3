@@ -52,7 +52,14 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 	}
 
 	// Imprimir el mensaje de vuelta
-	fmt.Printf("Mensaje recibido de vuelta: %s\n", resp.GetReply())
+	mensajeRecibido := resp.GetReply()
+	fmt.Printf("Mensaje recibido de vuelta: %s\n", mensajeRecibido)
+
+	// Escribir en el archivo "log_informantes.txt"
+	escribirEnArchivo := fmt.Sprintf("%s %s %s\n", mensaje, mensajeRecibido, resp.GetReply())
+	if err := escribirEnLog("log_informantes.txt", escribirEnArchivo); err != nil {
+		return fmt.Errorf("Error al escribir en el archivo de registro: %v", err)
+	}
 
 	return nil
 }
@@ -63,6 +70,17 @@ func EnviarMensajeAFulcrum(mensaje, direccionIP string) error {
 	// En este ejemplo, simplemente imprimimos un mensaje simulando el envío a la dirección IP.
 	fmt.Printf("Enviando mensaje '%s' a la dirección IP: %s\n", mensaje, direccionIP)
 	return nil
+}
+
+func escribirEnLog(nombreArchivo, mensaje string) error {
+	archivo, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer archivo.Close()
+
+	_, err = archivo.WriteString(mensaje)
+	return err
 }
 
 func main() {
