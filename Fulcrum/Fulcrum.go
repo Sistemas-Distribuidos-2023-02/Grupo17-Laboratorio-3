@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"bufio"
 	"strconv"
 	"time"
@@ -174,6 +174,8 @@ func FuncionInformante(msg string, stream pb.OMS_NotifyBidirectionalServer) erro
 		return stream.Send(respuesta)
 	}
 
+	respuesta := &pb.Response{Reply: "Comando exitoso"}
+	return stream.Send(respuesta)
 	return nil
 }
 

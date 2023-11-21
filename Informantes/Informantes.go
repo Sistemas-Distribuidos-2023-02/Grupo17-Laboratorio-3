@@ -39,9 +39,10 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 
     // Imprimir la dirección IP recibida
     fmt.Printf("Dirección IP recibida: %s\n", resp.GetReply())
-
+	ip := resp.GetReply()
     // Enviar automáticamente el mensaje a la dirección IP recibida
-    err = EnviarMensajeAFulcrum(mensaje, resp.GetReply())
+
+    err = EnviarMensajeAFulcrum(mensaje, ip)
     if err != nil {
         return fmt.Errorf("Error al enviar mensaje a Fulcrum: %v", err)
     }
@@ -71,10 +72,8 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 
 
 func EnviarMensajeAFulcrum(mensaje string, direccionIP string) error {
-	// Implementa la lógica para enviar el mensaje a la dirección IP proporcionada.
-	// Puedes usar las funciones estándar de Go para realizar operaciones de red, como 'net.Dial'.
-	// En este ejemplo, simplemente imprimimos un mensaje simulando el envío a la dirección IP.
-	conn, err := grpc.Dial(direccionIP, grpc.WithInsecure())
+    // Crear un nuevo cliente
+    conn, err := grpc.Dial(direccionIP, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,6 @@ func EnviarMensajeAFulcrum(mensaje string, direccionIP string) error {
 	}
 
 	mensaje_recv, err := stream.Recv()
-	fmt.Printf("Mensaje recibido de vuelta: %s\n", mensaje_recv)
 	if err != nil {
         log.Fatalf("Error al recibir el mensaje: %v", err)
 		return err
@@ -104,8 +102,9 @@ func EnviarMensajeAFulcrum(mensaje string, direccionIP string) error {
 	} 
 	log.Print("\n")
 
-	return nil
+    return nil
 }
+
 
 func escribirEnLog(nombreArchivo string, mensaje string) error {
 	archivo, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_WRONLY, 0644)
