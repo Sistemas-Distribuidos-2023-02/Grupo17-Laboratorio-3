@@ -2,6 +2,8 @@ package main
 
 import (
 	// "context"
+	"strconv"
+	"time"
 	"log"
 	"net"
 	"os"
@@ -18,6 +20,14 @@ var fulcrum_id int
 type server struct {
 	pb.UnimplementedOMSServer
 }
+
+func Max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
 func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) error {
 	// Recibir el mensaje del BrokerLuna
 	request, err := stream.Recv()
@@ -30,8 +40,12 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 	if len(comandos) >= 2 && comandos[0] == "Consistencia" {
 		rv := strings.Split(comandos[1],",")
 		for i := 0; i < len(rv); i++ {
-			temp := strconv.Atoi(rv[i])
-			reloj_de_vectores[i] = math.Max(temp,reloj_de_vectores[i]);
+			temp,err := strconv.Atoi(rv[i])
+			temp = int(temp)
+			if err != nil {
+				continue
+			}
+			reloj_de_vectores[i] = Max(temp,reloj_de_vectores[i]);
 		}
 		return nil
 	}
@@ -92,10 +106,10 @@ func schedule(f func(), interval time.Duration) *time.Ticker {
     return ticker
 }
 
-func Consistencia(){
+func Consistencia() error {
 	for i := 0; i < len(fulcrumServers); i++ {
 		if i != fulcrum_id {
-			ip = fulcrumServers[i]
+			ip := fulcrumServers[i]
 			conn, err := grpc.Dial(ip, grpc.WithInsecure())
 			if err != nil {
 				log.Fatalf("No se pudo conectar al servidor: %v", err)
@@ -113,7 +127,7 @@ func Consistencia(){
 				if i + 1 == len(fulcrumServers){
 					msg += strconv.Itoa(reloj_de_vectores[i]);
 				} else {
-					mas += strconv.Itoa(reloj_de_vectores[i]) + ",";
+					msg += strconv.Itoa(reloj_de_vectores[i]) + ",";
 				}
 			}
 
@@ -132,11 +146,16 @@ func Consistencia(){
 			
 			rv := strings.Split(strings.Split(mensaje_recv.Reply," ")[1],",")
 			for i := 0; i < len(rv); i++ {
-				temp := strconv.Atoi(rv[i])
-				reloj_de_vectores[i] = math.Max(temp,reloj_de_vectores[i]);
+				temp,err := strconv.Atoi(rv[i])
+				if err == nil {
+					continue
+				}
+				temp = int(temp)
+				reloj_de_vectores[i] = Max(temp,reloj_de_vectores[i]);
 			}
 		}
 	}
+	return nil
 }
 
 func main() {
