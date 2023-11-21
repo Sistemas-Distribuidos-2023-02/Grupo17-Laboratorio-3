@@ -6,28 +6,39 @@
 
 
 ## Instrucciones 
-Para iniciar el servidor OMS usando docker usamos el siguente comando.
+Se separó la ejecución de cada comando por máquina virtual.
+### Máquina Virtual 1 (dist065)
+Para correr los contenedores:
 ```sh
-make docker-oms
+make docker-mv-1
 ```
-Para iniciar un servidor ONU usando docker usamos el siguiente comando. 
+Para abrir la terminal del Informante 1 (Caiatl):
 ```sh
-make docker-onu
+docker exec -it grupo17-laboratorio-3_informante_1 sh
 ```
-Ademas para acceder a la terminal del docker usamos.
+### Máquina Virtual 2 (dist066)
+Para correr los contenedores:
 ```sh
-docker exec -it grupo17-laboratorio-2_onu_1 sh
+make docker-mv-2
 ```
-Para iniciar los servidores de los continentes se usa el siguente comando.
+Para abrir la terminal del Informante 2 (Osiris):
 ```sh
-make docker-continente
+docker exec -it grupo17-laboratorio-3_informante_2_1 sh
 ```
-Para iniciar los servidores de los datanodes se usa el siguente comando.
+### Máquina Virtual 3 (dist067)
+Para correr los contenedores:
 ```sh
-make docker-datanode1
-make docker-datanode2
+make docker-mv-3
 ```
-
+Para abrir la terminal del Informante 1 (Caiatl):
+```sh
+docker exec -it grupo17-laboratorio-3_vanguardia_1 sh
+```
+### Máquina Virtual 4 (dist068)
+Para correr los contenedores:
+```sh
+make docker-mv-4
+```
 
 
 
