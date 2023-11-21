@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 	"strings"
-
+	"fmt"
 	"google.golang.org/grpc"
 	pb "main/proto"
 )
@@ -55,19 +55,15 @@ func escribirEnLog(nombreArchivo string, mensaje string) error {
 }
 
 func FuncionVanguardia(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	// Lógica específica para mensajes de Vanguardia
-	// ...
-
-	// Enviar respuesta al BrokerLuna
+	fmt.Println("Mensaje recibido: ",msg)
 	respuesta := &pb.Response{Reply: "Respuesta desde Vanguardia"}
 	return stream.Send(respuesta)
 }
 
 func FuncionInformante(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	// Lógica específica para mensajes de Informante
-	// ...
-
-	// Enviar respuesta al BrokerLuna
+	fmt.Println("Mensaje recibido: ",msg)
+	comandos := strings.Split(msg," ")
+	// if comandos[2] == "GetSoldados"
 	respuesta := &pb.Response{Reply: "Respuesta desde Informante"}
 	return stream.Send(respuesta)
 }

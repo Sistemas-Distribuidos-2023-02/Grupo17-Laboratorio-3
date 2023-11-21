@@ -1,3 +1,5 @@
 BorrarBase fa ru 3
 AgregarBase peru ramon 2
 AgregarBase colombia colocolo 134
+GetSoldados Conce Peru
+GetSoldados Conce Peru
