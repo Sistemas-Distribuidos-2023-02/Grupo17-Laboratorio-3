@@ -30,6 +30,7 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 	if comandos[1] == "Informante" {
 		ip := fulcrumServers[rand.Intn(len(fulcrumServers))]
 		mensaje := &pb.Response{Reply: ip}
+		log.Println("Mensaje recibido: ",request.Message)
 		if err := stream.Send(mensaje); err != nil {
 			return err
 		}

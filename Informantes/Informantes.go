@@ -16,6 +16,7 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 	client := pb.NewOMSClient(conn)
 
 	// Construir el mensaje
+	mensaje = "_ Informante " + mensaje
 	request := &pb.Request{Message: mensaje}
 
 	// Enviar el mensaje a BrokerLuna
