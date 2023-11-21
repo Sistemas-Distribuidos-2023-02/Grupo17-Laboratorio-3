@@ -3,6 +3,8 @@ package main
 import (
 	// "context"
 	"bufio"
+	"strconv"
+	"time"
 	"log"
 	"net"
 	"os"
@@ -12,9 +14,21 @@ import (
 	pb "main/proto"
 )
 
+var fulcrumServers []string 
+var reloj_de_vectores []int
+var fulcrum_id int
+
 type server struct {
 	pb.UnimplementedOMSServer
 }
+
+func Max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
 func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) error {
 	// Recibir el mensaje del BrokerLuna
 	request, err := stream.Recv()
@@ -22,6 +36,20 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
+	reloj_de_vectores[fulcrum_id]++
+
+	if len(comandos) >= 2 && comandos[0] == "Consistencia" {
+		rv := strings.Split(comandos[1],",")
+		for i := 0; i < len(rv); i++ {
+			temp,err := strconv.Atoi(rv[i])
+			temp = int(temp)
+			if err != nil {
+				continue
+			}
+			reloj_de_vectores[i] = Max(temp,reloj_de_vectores[i]);
+		}
+		return nil
+	}
 
 	log := ""
 	for i := 2; i < len(comandos); i++ {
@@ -310,9 +338,90 @@ func escribirArchivo(filename string, lines []string) error {
 	return nil
 }
 
+func schedule(f func(), interval time.Duration) *time.Ticker {
+    ticker := time.NewTicker(interval)
+    go func() {
+        for range ticker.C {
+            f()
+        }
+    }()
+    return ticker
+}
+
+func Consistencia() error {
+	for i := 0; i < len(fulcrumServers); i++ {
+		if i != fulcrum_id {
+			ip := fulcrumServers[i]
+			conn, err := grpc.Dial(ip, grpc.WithInsecure())
+			if err != nil {
+				log.Fatalf("No se pudo conectar al servidor: %v", err)
+				continue
+			}
+			client := pb.NewOMSClient(conn)
+			stream_fulcrum, err := client.NotifyBidirectional(context.Background())
+			if err != nil {
+				log.Fatalf("Error al abrir el flujo bidireccional: %v", err)
+				continue
+			}
+
+			msg := "Consistencia "
+			for i := 0; i < len(fulcrumServers); i++ {
+				if i + 1 == len(fulcrumServers){
+					msg += strconv.Itoa(reloj_de_vectores[i]);
+				} else {
+					msg += strconv.Itoa(reloj_de_vectores[i]) + ",";
+				}
+			}
+
+			mensaje_send := &pb.Request{Message: msg}
+			if err := stream_fulcrum.Send(mensaje_send); err != nil {
+				log.Fatalf("Error al enviar mensaje: %v", err)
+				continue
+			}
+
+			mensaje_recv, err := stream_fulcrum.Recv()
+			if err != nil {
+				log.Fatalf("Error al recibir el mensaje: %v", err)
+				return err
+			}
+
+			
+			rv := strings.Split(strings.Split(mensaje_recv.Reply," ")[1],",")
+			for i := 0; i < len(rv); i++ {
+				temp,err := strconv.Atoi(rv[i])
+				if err == nil {
+					continue
+				}
+				temp = int(temp)
+				reloj_de_vectores[i] = Max(temp,reloj_de_vectores[i]);
+			}
+		}
+	}
+	return nil
+}
+
 func main() {
+	fulcrumServers = []string{
+		"localhost:50051",
+		"localhost:50052",
+		"localhost:50053",
+	}
+
+	reloj_de_vectores = []int{
+		0,0,0,
+	}
+
+	for i := 0; i < len(fulcrumServers); i++ {
+		if(fulcrumServers[i] == "localhost:50051"){
+			fulcrum_id = i
+		}
+		
+	}
+
 	// Inicia el servidor Fulcrum
 	listener, err := net.Listen("tcp", "localhost:50051")
+
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
