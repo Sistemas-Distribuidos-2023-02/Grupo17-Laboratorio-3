@@ -2,6 +2,7 @@ package main
 
 import (
 	// "context"
+	"bufio"
 	"log"
 	"net"
 	"os"
@@ -55,17 +56,258 @@ func escribirEnLog(nombreArchivo string, mensaje string) error {
 }
 
 func FuncionVanguardia(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	fmt.Println("Mensaje recibido: ",msg)
-	respuesta := &pb.Response{Reply: "Respuesta desde Vanguardia"}
-	return stream.Send(respuesta)
+    fmt.Println("Mensaje recibido: ", msg)
+    comandos := strings.Split(msg, " ")
+    if comandos[2] == "GetSoldados" {
+        archivoPath := comandos[3] + ".txt"
+        if _, err := os.Stat(archivoPath); err == nil {
+            archivo, err := os.Open(archivoPath)
+            if err != nil {
+                return err
+            }
+            defer archivo.Close()
+            scanner := bufio.NewScanner(archivo)
+            for scanner.Scan() {
+                partes := strings.Split(scanner.Text(), " ")
+                if len(partes) == 2 {
+                    palabra := partes[0]
+                    numero := partes[1]
+                    if palabra == comandos[4] {
+                        respuesta := &pb.Response{Reply: numero}
+                        return stream.Send(respuesta)
+                    }
+                }
+            }
+            respuesta := &pb.Response{Reply: "No existe la base " + comandos[4] + " en el sector " + comandos[3]}
+            return stream.Send(respuesta)
+        }
+        respuesta := &pb.Response{Reply: "No existe el sector " + comandos[3]}
+        return stream.Send(respuesta)
+    }
+    respuesta := &pb.Response{Reply: "Comando Inválido"}
+    return stream.Send(respuesta)
 }
 
+
+
 func FuncionInformante(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	fmt.Println("Mensaje recibido: ",msg)
-	comandos := strings.Split(msg," ")
-	// if comandos[2] == "GetSoldados"
-	respuesta := &pb.Response{Reply: "Respuesta desde Informante"}
-	return stream.Send(respuesta)
+	fmt.Println("Mensaje recibido: ", msg)
+	comandos := strings.Split(msg, " ")
+	switch comandos[2] {
+	case "AgregarBase":
+		if _, err := os.Stat(comandos[3] + ".txt"); err == nil {
+			// Archivo de sector existe, revisar si la base ya existe
+			if baseYaExiste(comandos[3]+".txt", comandos[4]) {
+				respuesta := &pb.Response{Reply: "Esa base ya existe"}
+				return stream.Send(respuesta)
+			}
+			// Base no existe, agregarla
+			if err := agregarBase(comandos[3]+".txt", comandos[4], comandos[5]); err != nil {
+				respuesta := &pb.Response{Reply: fmt.Sprintf("Error al agregar la base: %v", err)}
+				return stream.Send(respuesta)
+			}
+		} else {
+			// Archivo de sector no existe, crearlo y agregar la base
+			if err := crearSectorYAgregarBase(comandos[3]+".txt", comandos[4], comandos[5]); err != nil {
+				respuesta := &pb.Response{Reply: fmt.Sprintf("Error al crear el sector y agregar la base: %v", err)}
+				return stream.Send(respuesta)
+			}
+		}
+
+	case "RenombrarBase":
+		if _, err := os.Stat(comandos[3] + ".txt"); err == nil {
+			// Archivo de sector existe, actualizar el nombre de la base
+			if err := renombrarBase(comandos[3]+".txt", comandos[4], comandos[5]); err != nil {
+				respuesta := &pb.Response{Reply: fmt.Sprintf("Error al renombrar la base: %v", err)}
+				return stream.Send(respuesta)
+			}
+		}
+
+	case "ActualizarValor":
+		if _, err := os.Stat(comandos[3] + ".txt"); err == nil {
+			// Archivo de sector existe, actualizar el valor de la base
+			if err := actualizarValor(comandos[3]+".txt", comandos[4], comandos[5]); err != nil {
+				respuesta := &pb.Response{Reply: fmt.Sprintf("Error al actualizar el valor de la base: %v", err)}
+				return stream.Send(respuesta)
+			}
+		}
+
+	case "BorrarBase":
+		if _, err := os.Stat(comandos[3] + ".txt"); err == nil {
+			// Archivo de sector existe, borrar la base
+			if err := borrarBase(comandos[3]+".txt", comandos[4]); err != nil {
+				respuesta := &pb.Response{Reply: fmt.Sprintf("Error al borrar la base: %v", err)}
+				return stream.Send(respuesta)
+			}
+		}
+
+	default:
+		respuesta := &pb.Response{Reply: "Comándo Inválido"}
+		return stream.Send(respuesta)
+	}
+
+	return nil
+}
+
+func baseYaExiste(filename, nombreBase string) bool {
+	file, err := os.Open(filename)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		linea := scanner.Text()
+		palabras := strings.Fields(linea)
+		if len(palabras) >= 1 && palabras[0] == nombreBase {
+			// La base ya existe
+			return true
+		}
+	}
+
+	return false
+}
+
+func agregarBase(filename, nombreBase, numero string) error {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(fmt.Sprintf("%s %s\n", nombreBase, numero)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func crearSectorYAgregarBase(filename, nombreBase, numero string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(fmt.Sprintf("%s %s\n", nombreBase, numero)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func renombrarBase(filename, antiguoNombre, nuevoNombre string) error {
+	lines, err := leerArchivo(filename)
+	if err != nil {
+		return err
+	}
+
+	for i, line := range lines {
+		palabras := strings.Fields(line)
+		if len(palabras) >= 1 && palabras[0] == antiguoNombre {
+			// Actualizar el nombre de la base
+			lines[i] = fmt.Sprintf("%s %s", nuevoNombre, palabras[1])
+			break
+		}
+	}
+
+	if err := escribirArchivo(filename, lines); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func actualizarValor(filename, nombreBase, nuevoNumero string) error {
+	lines, err := leerArchivo(filename)
+	if err != nil {
+		return err
+	}
+
+	for i, line := range lines {
+		palabras := strings.Fields(line)
+		if len(palabras) >= 1 && palabras[0] == nombreBase {
+			// Actualizar el número de la base
+			lines[i] = fmt.Sprintf("%s %s", palabras[0], nuevoNumero)
+			break
+		}
+	}
+
+	if err := escribirArchivo(filename, lines); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func borrarBase(filename, nombreBase string) error {
+	lines, err := leerArchivo(filename)
+	if err != nil {
+		return err
+	}
+
+	var nuevasLineas []string
+	borrar := false
+
+	for _, line := range lines {
+		palabras := strings.Fields(line)
+		if len(palabras) >= 1 && palabras[0] == nombreBase {
+			// No añadir la línea al slice para borrar la base
+			borrar = true
+		} else {
+			nuevasLineas = append(nuevasLineas, line)
+		}
+	}
+
+	if borrar {
+		if err := escribirArchivo(filename, nuevasLineas); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func leerArchivo(filename string) ([]string, error) {
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return lines, nil
+}
+
+func escribirArchivo(filename string, lines []string) error {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	for _, line := range lines {
+		if _, err := writer.WriteString(line + "\n"); err != nil {
+			return err
+		}
+	}
+
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {
