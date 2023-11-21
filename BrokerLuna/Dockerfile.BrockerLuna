@@ -1,0 +1,49 @@
+# Use the official Golang image as the base image
+FROM golang:1.18
+
+# Set the working directory to the root of your application
+WORKDIR /app/BrokerLuna
+
+# Copy your Go source code and necessary files
+COPY BrokerLuna.go ./
+COPY go.mod ./
+COPY go.sum ./
+COPY proto /app/BrokerLuna/proto
+
+ARG fulcrum1_server=localhost
+ARG fulcrum1_port=50051
+ARG fulcrum2_server=localhost
+ARG fulcrum2_port=50052
+ARG fulcrum3_server=localhost
+ARG fulcrum3_port=50053
+ARG informante1_server=localhost
+ARG informante1_port=50081
+ARG informante2_server=localhost
+ARG informante2_port=50082
+ARG vanguardia_server=localhost
+ARG vanguardia_port=50083
+
+ENV fulcrum1_server=$fulcrum1_server
+ENV fulcrum1_port=$fulcrum1_port
+ENV fulcrum2_server=$fulcrum2_server
+ENV fulcrum2_port=$fulcrum2_port
+ENV fulcrum3_server=$fulcrum3_server
+ENV fulcrum3_port=$fulcrum3_port
+ENV informante1_server=$informante1_server
+ENV informante1_port=$informante1_port
+ENV informante2_server=$informante2_server
+ENV informante2_port=$informante2_port
+ENV vanguardia_server=$vanguardia_server
+ENV vanguardia_port=$vanguardia_port
+
+EXPOSE 50051
+EXPOSE 50052
+EXPOSE 50053
+EXPOSE 50070
+EXPOSE 50081
+EXPOSE 50082
+EXPOSE 50083
+# Download Go module dependencies
+RUN go mod download
+    
+CMD go run OMS.go

@@ -1,0 +1,25 @@
+# Use the official Golang image as the base image
+FROM golang:1.18
+
+# Set the working directory to the root of your application
+WORKDIR /app/Informantes
+
+# Copy your Go source code and necessary files
+COPY Informantes.go ./
+COPY go.mod ./
+COPY go.sum ./
+COPY proto /app/Informantes/proto
+
+ARG broker_server=localhost
+ARG broker_port=50070
+
+ENV broker_server=$broker_server
+ENV broker_port=$broker_port
+
+EXPOSE 50070
+EXPOSE 50081
+EXPOSE 50082
+# Download Go module dependencies
+RUN go mod download
+    
+CMD go run OMS.go

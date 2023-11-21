@@ -1,0 +1,38 @@
+# Use the official Golang image as the base image
+FROM golang:1.18
+
+# Set the working directory to the root of your application
+WORKDIR /app/Fulcrum
+
+# Copy your Go source code and necessary files
+COPY Fulcrum.go ./
+COPY go.mod ./
+COPY go.sum ./
+COPY proto /app/Fulcrum/proto
+
+ARG fulcrum1_server=localhost
+ARG fulcrum1_port=50051
+ARG fulcrum2_server=localhost
+ARG fulcrum2_port=50052
+ARG fulcrum3_server=localhost
+ARG fulcrum3_port=50053
+ARG broker_server=localhost
+ARG broker_port=50070
+
+ENV fulcrum1_server=$fulcrum1_server
+ENV fulcrum1_port=$fulcrum1_port
+ENV fulcrum2_server=$fulcrum2_server
+ENV fulcrum2_port=$fulcrum2_port
+ENV fulcrum3_server=$fulcrum3_server
+ENV fulcrum3_port=$fulcrum3_port
+ENV broker_server=$broker_server
+ENV broker_port=$broker_port
+
+EXPOSE 50070
+EXPOSE 50051
+EXPOSE 50052
+EXPOSE 50053
+# Download Go module dependencies
+RUN go mod download
+    
+CMD go run OMS.go

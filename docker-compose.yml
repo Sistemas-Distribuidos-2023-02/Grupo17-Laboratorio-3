@@ -5,6 +5,8 @@ services:
       context: ./Fulcrum
       dockerfile: Dockerfile.Fulcrum
       args:
+        fulcrum1_server: dist065.inf.santiago.usm.cl
+        fulcrum1_port: 50051
         fulcrum2_server: dist066.inf.santiago.usm.cl
         fulcrum2_port: 50052
         fulcrum3_server: dist067.inf.santiago.usm.cl
@@ -15,56 +17,15 @@ services:
       - ./Fulcrum:/app/Fulcrum
     network_mode: "host"
 
-  fulcrum2:
+  informante:
     build:
-      context: ./Fulcrum
-      dockerfile: Dockerfile.Fulcrum
+      context: ./Informantes
+      dockerfile: Dockerfile.Informantes
       args:
-        fulcrum1_server: dist065.inf.santiago.usm.cl
-        fulcrum1_port: 50051
-        fulcrum3_server: dist067.inf.santiago.usm.cl
-        fulcrum3_port: 50053
         broker_server: dist068.inf.santiago.usm.cl
         broker_port: 50070
     volumes:
-      - ./Fulcrum:/app/Fulcrum
-    network_mode: "host"
-
-  fulcrum3:
-    build:
-      context: ./Fulcrum
-      dockerfile: Dockerfile.Fulcrum
-      args:
-        fulcrum1_server: dist065.inf.santiago.usm.cl
-        fulcrum1_port: 50051
-        fulcrum2_server: dist066.inf.santiago.usm.cl
-        fulcrum2_port: 50052
-        broker_server: dist068.inf.santiago.usm.cl
-        broker_port: 50070
-    volumes:
-      - ./Fulcrum:/app/Fulcrum
-    network_mode: "host"
-
-  informante1:
-    build:
-      context: ./Informantes
-      dockerfile: Dockerfile.Informante
-      args:
-        broker_server: dist068.inf.santiago.usm.cl
-        broker_port: 50080
-    volumes:
-      - ./Informante:/app/Informante
-    network_mode: "host"
-
-  informante2:
-    build:
-      context: ./Informantes
-      dockerfile: Dockerfile.Informante
-      args:
-        broker_server: dist068.inf.santiago.usm.cl
-        broker_port: 50080
-    volumes:
-      - ./Informante:/app/Informante
+      - ./Informantes:/app/Informantes
     network_mode: "host"
 
   broker-luna:
@@ -94,7 +55,7 @@ services:
       dockerfile: Dockerfile.Vanguardia
       args:
         broker_server: dist068.inf.santiago.usm.cl
-        broker_port: 50080
+        broker_port: 50070
     volumes:
       - ./Vanguardia:/app/Vanguardia
     network_mode: "host"

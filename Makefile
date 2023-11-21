@@ -1,11 +1,11 @@
 docker-mv-1:
-	docker-compose -f docker-compose.yml up -d informante1 fulcrum1
+	docker-compose -f docker-compose.yml up -d informante fulcrum
 
 docker-mv-2:
-	docker-compose -f docker-compose.yml up -d informante2 fulcrum2
+	docker-compose -f docker-compose.yml up -d informante fulcrum
 
 docker-mv-3:
-	docker-compose -f docker-compose.yml up -d vanguardia fulcrum3
+	docker-compose -f docker-compose.yml up -d vanguardia fulcrum
 
 docker-mv-4:
 	docker-compose -f docker-compose.yml up -d broker-luna
