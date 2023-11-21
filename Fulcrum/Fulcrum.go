@@ -4,29 +4,35 @@ import (
 	// "context"
 	"log"
 	"net"
-	// "os"
+	"os"
 	"strings"
 
 	"google.golang.org/grpc"
 	pb "main/proto"
 )
 
-type fulcrumServer struct {
+type server struct {
 	pb.UnimplementedOMSServer
 }
-
-func (s *fulcrumServer) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) error {
+func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) error {
 	// Recibir el mensaje del BrokerLuna
 	request, err := stream.Recv()
 	if err != nil {
 		return err
 	}
-
-	// Dividir el mensaje en palabras
-	comandos := strings.Split(request.Message, " ")
+	comandos := strings.Split(request.Message," ")
 	if len(comandos) != 6 {
 		return nil
 	}
+	log := ""
+	for i := 2; i < len(comandos); i++ {
+		if i + 1 == len(comandos) {
+			log += comandos[i]
+		} else {
+			log += comandos[i]
+		}
+	}
+	WriteLog(log)
 
 	// Ejecutar función correspondiente según el tipo de mensaje
 	if comandos[1] == "Vanguardia" {
@@ -34,6 +40,17 @@ func (s *fulcrumServer) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalSer
 	} else if comandos[1] == "Informante" {
 		return FuncionInformante(request.Message, stream)
 	}
+
+	return nil
+}
+
+func WriteLog(log string) error {
+	f, err := os.Create("log.txt")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	f.WriteString(log)
 
 	return nil
 }
@@ -64,7 +81,7 @@ func main() {
 	}
 
 	serv := grpc.NewServer()
-	pb.RegisterOMSServer(serv, &fulcrumServer{})
+	pb.RegisterOMSServer(serv, &server{})
 
 	log.Printf("FulcrumServer listening at %v", listener.Addr())
 	if err := serv.Serve(listener); err != nil {
