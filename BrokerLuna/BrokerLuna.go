@@ -23,9 +23,6 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
-	if len(comandos) != 6 {
-		return nil
-	}
 
 	if comandos[1] == "Informante" {
 		ip := fulcrumServers[rand.Intn(len(fulcrumServers))]
@@ -84,8 +81,8 @@ func main() {
 	} */
 	fulcrumServers = []string{
 		"localhost:50051",
-		"localhost:50052",
-		"localhost:50053",
+		// "localhost:50052",
+		// "localhost:50053",
 	}
 
 	//informante1Server := os.Getenv("informante1_server") + ":" + os.Getenv("informante1_port")

@@ -21,9 +21,7 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
-	if len(comandos) != 6 {
-		return nil
-	}
+	
 	log := ""
 	for i := 2; i < len(comandos); i++ {
 		if i + 1 == len(comandos) {
