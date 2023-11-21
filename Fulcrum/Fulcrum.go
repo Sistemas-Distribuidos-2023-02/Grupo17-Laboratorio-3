@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 	"strings"
-
+	"fmt"
 	"google.golang.org/grpc"
 	pb "main/proto"
 )
@@ -25,6 +25,7 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
+<<<<<<< HEAD
 	reloj_de_vectores[fulcrum_id]++
 
 	if len(comandos) >= 2 && comandos[0] == "Consistencia" {
@@ -35,16 +36,19 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		}
 		return nil
 	}
+=======
+>>>>>>> 0d48060e584e8d1b2a2629551550f09cb2bed121
 
 	log := ""
 	for i := 2; i < len(comandos); i++ {
 		if i + 1 == len(comandos) {
 			log += comandos[i]
 		} else {
-			log += " " +  comandos[i]
+			log += comandos[i] + " "
 		}
 	}
-	WriteLog(log)
+	log += "\n"
+	escribirEnLog("log.txt",log)
 
 	// Ejecutar función correspondiente según el tipo de mensaje
 	if comandos[1] == "Vanguardia" {
@@ -56,31 +60,27 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 	return nil
 }
 
-func WriteLog(log string) error {
-	f, err := os.Create("log.txt")
+func escribirEnLog(nombreArchivo string, mensaje string) error {
+	archivo, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	f.WriteString(log)
+	defer archivo.Close()
 
-	return nil
+	_, err = archivo.WriteString(mensaje)
+	return err
 }
 
 func FuncionVanguardia(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	// Lógica específica para mensajes de Vanguardia
-	// ...
-
-	// Enviar respuesta al BrokerLuna
+	fmt.Println("Mensaje recibido: ",msg)
 	respuesta := &pb.Response{Reply: "Respuesta desde Vanguardia"}
 	return stream.Send(respuesta)
 }
 
 func FuncionInformante(msg string, stream pb.OMS_NotifyBidirectionalServer) error {
-	// Lógica específica para mensajes de Informante
-	// ...
-
-	// Enviar respuesta al BrokerLuna
+	fmt.Println("Mensaje recibido: ",msg)
+	comandos := strings.Split(msg," ")
+	// if comandos[2] == "GetSoldados"
 	respuesta := &pb.Response{Reply: "Respuesta desde Informante"}
 	return stream.Send(respuesta)
 }

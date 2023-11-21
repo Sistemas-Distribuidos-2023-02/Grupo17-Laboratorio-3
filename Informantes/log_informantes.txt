@@ -1,0 +1,5 @@
+AgregarBase rsa r1 3 localhost:50051
+AgregarBase fa ru 3 localhost:50051
+BorrarBase fa ru 3 localhost:50051
+AgregarBase peru ramon 2 localhost:50051
+AgregarBase colombia colocolo 134 localhost:50051

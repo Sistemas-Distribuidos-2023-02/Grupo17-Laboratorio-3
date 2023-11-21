@@ -45,18 +45,21 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 		return err
 	}
 
-	// Recibir el mensaje de vuelta
-	resp, err = stream.Recv()
-	if err != nil {
-		return fmt.Errorf("Error al recibir mensaje de vuelta: %v", err)
-	}
-
 	// Imprimir el mensaje de vuelta
 	mensajeRecibido := resp.GetReply()
 	fmt.Printf("Mensaje recibido de vuelta: %s\n", mensajeRecibido)
 
 	// Escribir en el archivo "log_informantes.txt"
-	escribirEnArchivo := fmt.Sprintf("%s %s %s\n", mensaje, mensajeRecibido, resp.GetReply())
+	comandos := strings.Split(mensaje," ")
+	log := ""
+	for i := 2; i < len(comandos); i++ {
+		if i + 1 == len(comandos) {
+			log += comandos[i]
+		} else {
+			log += comandos[i] + " "
+		}
+	}
+	escribirEnArchivo := fmt.Sprintf("%s %s\n", log, mensajeRecibido)
 	if err := escribirEnLog("log_informantes.txt", escribirEnArchivo); err != nil {
 		return fmt.Errorf("Error al escribir en el archivo de registro: %v", err)
 	}
