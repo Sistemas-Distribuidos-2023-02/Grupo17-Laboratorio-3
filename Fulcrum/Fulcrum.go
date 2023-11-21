@@ -25,7 +25,6 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
-<<<<<<< HEAD
 	reloj_de_vectores[fulcrum_id]++
 
 	if len(comandos) >= 2 && comandos[0] == "Consistencia" {
@@ -36,8 +35,6 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		}
 		return nil
 	}
-=======
->>>>>>> 0d48060e584e8d1b2a2629551550f09cb2bed121
 
 	log := ""
 	for i := 2; i < len(comandos); i++ {
