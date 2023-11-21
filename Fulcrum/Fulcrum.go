@@ -29,7 +29,7 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		if i + 1 == len(comandos) {
 			log += comandos[i]
 		} else {
-			log += comandos[i]
+			log += " " +  comandos[i]
 		}
 	}
 	WriteLog(log)
