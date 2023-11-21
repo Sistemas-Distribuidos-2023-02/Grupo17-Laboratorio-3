@@ -30,7 +30,7 @@ Para correr los contenedores:
 ```sh
 make docker-mv-3
 ```
-Para abrir la terminal del Informante 1 (Caiatl):
+Para abrir la terminal de la Vanguardia:
 ```sh
 docker exec -it grupo17-laboratorio-3_vanguardia_1 sh
 ```
