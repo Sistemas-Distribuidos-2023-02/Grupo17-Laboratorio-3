@@ -64,15 +64,43 @@ func EnviarMensajeABrokerLuna(mensaje string, conn *grpc.ClientConn) error {
 	return nil
 }
 
-func EnviarMensajeAFulcrum(mensaje, direccionIP string) error {
+func EnviarMensajeAFulcrum(mensaje string, direccionIP string) error {
 	// Implementa la lógica para enviar el mensaje a la dirección IP proporcionada.
 	// Puedes usar las funciones estándar de Go para realizar operaciones de red, como 'net.Dial'.
 	// En este ejemplo, simplemente imprimimos un mensaje simulando el envío a la dirección IP.
+	conn, err := grpc.Dial(direccionIP, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
 	fmt.Printf("Enviando mensaje '%s' a la dirección IP: %s\n", mensaje, direccionIP)
+	client := pb.NewOMSClient(conn)
+	stream, err := client.NotifyBidirectional(context.Background())
+	if err != nil {
+        log.Fatalf("Error al abrir el flujo bidireccional: %v", err)
+		return err
+	}
+	mensaje_send := &pb.Request{Message: mensaje}
+	if err := stream.Send(mensaje_send); err != nil {
+        log.Fatalf("Error al enviar mensaje: %v", err)
+		return err
+	}
+
+	mensaje_recv, err := stream.Recv()
+	if err != nil {
+        log.Fatalf("Error al recibir el mensaje: %v", err)
+		return err
+	}
+	// Procesa relojes
+	relojes := strings.Split(mensaje_recv.Reply,",")
+	for i := 0; i < len(relojes); i++ {
+		log.Print(relojes[i] + " ")
+	} 
+	log.Print("\n")
+
 	return nil
 }
 
-func escribirEnLog(nombreArchivo, mensaje string) error {
+func escribirEnLog(nombreArchivo string, mensaje string) error {
 	archivo, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
