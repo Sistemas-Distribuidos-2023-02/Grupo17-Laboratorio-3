@@ -1,1 +1,3 @@
-GetSoldadosTalcaBuin
+BorrarBase fa ru 3
+AgregarBase peru ramon 2
+AgregarBase colombia colocolo 134

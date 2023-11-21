@@ -21,16 +21,17 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 		return err
 	}
 	comandos := strings.Split(request.Message," ")
-	
+
 	log := ""
 	for i := 2; i < len(comandos); i++ {
 		if i + 1 == len(comandos) {
 			log += comandos[i]
 		} else {
-			log += " " +  comandos[i]
+			log += comandos[i] + " "
 		}
 	}
-	WriteLog(log)
+	log += "\n"
+	escribirEnLog("log.txt",log)
 
 	// Ejecutar función correspondiente según el tipo de mensaje
 	if comandos[1] == "Vanguardia" {
@@ -42,15 +43,15 @@ func (s *server) NotifyBidirectional(stream pb.OMS_NotifyBidirectionalServer) er
 	return nil
 }
 
-func WriteLog(log string) error {
-	f, err := os.Create("log.txt")
+func escribirEnLog(nombreArchivo string, mensaje string) error {
+	archivo, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	f.WriteString(log)
+	defer archivo.Close()
 
-	return nil
+	_, err = archivo.WriteString(mensaje)
+	return err
 }
 
 func FuncionVanguardia(msg string, stream pb.OMS_NotifyBidirectionalServer) error {

@@ -6,6 +6,7 @@ WORKDIR /app/Fulcrum
 
 # Copy your Go source code and necessary files
 COPY Fulcrum.go ./
+COPY log.txt ./
 COPY go.mod ./
 COPY go.sum ./
 COPY proto /app/Fulcrum/proto
