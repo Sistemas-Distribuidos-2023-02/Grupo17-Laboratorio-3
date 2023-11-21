@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc"
 	pb "main/proto"
 	"strings"
-	"os"
+	//"os"
 	"context"
 	"math/rand"
 )
@@ -76,10 +76,15 @@ func RedireccionMensaje(msg string,stream pb.OMS_NotifyBidirectionalServer) erro
 
 func main() {
 	// Obtener las direcciones IP de los servidores Fulcrum desde las variables de entorno
-	fulcrumServers = []string{
+	/* fulcrumServers = []string{
 		os.Getenv("fulcrum1_server") + ":" + os.Getenv("fulcrum1_port"),
 		os.Getenv("fulcrum2_server") + ":" + os.Getenv("fulcrum2_port"),
 		os.Getenv("fulcrum3_server") + ":" + os.Getenv("fulcrum3_port"),
+	} */
+	fulcrumServers = []string{
+		"localhost:50051",
+		"localhost:50052",
+		"localhost:50053",
 	}
 
 	//informante1Server := os.Getenv("informante1_server") + ":" + os.Getenv("informante1_port")
@@ -87,7 +92,7 @@ func main() {
 	//vanguardiaServer := os.Getenv("vanguardia_server") + ":" + os.Getenv("vanguardia_port")
 
 	// Inicia el servidor BrokerLuna
-	listener, err := net.Listen("tcp", "localhost:50051")
+	listener, err := net.Listen("tcp", "localhost:50070")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
